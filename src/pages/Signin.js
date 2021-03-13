@@ -1,4 +1,5 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
 import {
   Button,
   TextField,
@@ -12,7 +13,6 @@ import firebase from "../firebase/firebase.utils";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
-
 const signInValidationSchema = Yup.object().shape({
   email: Yup.string().email("Invalid Email").required("Email is required!!"),
   password: Yup.string()
@@ -22,9 +22,10 @@ const signInValidationSchema = Yup.object().shape({
 
 const stylesFunc = makeStyles((theme) => ({
   wrapper: {
-    marginTop: "10rem",
+    marginTop: "3rem",
     height: "calc(100vh - 19.0625rem)",
     textAlign: "center",
+    marginBottom:"9rem",
   },
   avatar: {
     margin: "1rem auto",
@@ -32,7 +33,13 @@ const stylesFunc = makeStyles((theme) => ({
   },
   signIn: {
     margin: "1rem",
-  },
+  }, 
+  register: {
+    textDecoration: 'none',
+    fontWeight: '600',
+    paddingLeft : '0.5rem'
+  }
+  
 }));
 
 const initialValues = {
@@ -41,18 +48,25 @@ const initialValues = {
 };
 
 function Signin() {
-  const [loginError,setLoginError]=useState(null)
+  const [loginError, setLoginError] = useState(null);
+  const history = useHistory();
   const signinStyles = stylesFunc();
 
   const handleGoogleButtonClick = () => {
     firebase.useGoogleProvider();
+    alert('You are succesfully logged in!');
+    history.push('/');
   };
 
   const handleFormSubmit = (values) => {
     // alert(JSON.stringify(values, null, 2));
-    firebase.signIn(values.email, values.password).then(res=>{
-      res? setLoginError(res):setLoginError(null)
-      });
+    firebase.signIn(values.email, values.password).then((res) => {
+      if (res) {
+        setLoginError(res);
+        return;
+      }
+      history.push("/");
+    });
   };
 
   return (
@@ -117,13 +131,23 @@ function Signin() {
                 </Button>
               </Grid>
             </Grid>
-            <p style={{textAlign:"center",color:"red"}}><small>{loginError}</small></p>
+            <p style={{ textAlign: "center", color: "red" }}>
+              <small>{loginError}</small>
+            </p>
             {/* 
             //TODO: Add register & forgot password text & links
             */}
           </form>
         )}
       </Formik>
+      <p>
+        Don't have an account?      
+        <a className = {signinStyles.register} href="/register">Register</a>
+      </p>
+            
+      <p>
+         <a className = {signinStyles.register} href="/forgot-password">Forgot Password?</a>
+      </p>
     </Container>
   );
 }
